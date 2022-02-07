@@ -22,7 +22,6 @@ import (
 
 var opts = godog.Options{
 	Output: colors.Colored(os.Stdout),
-	Format: "progress", // can define default values
 }
 
 func main() {
@@ -64,7 +63,9 @@ func replaceVariables(s *godog.Scenario) {
 	for i := range s.Steps {
 		step := s.Steps[i]
 		step.Text = strings.ReplaceAll(step.Text, "$NAMESPACE", uniqueNamespace)
-		step.Argument.DocString.Content = strings.ReplaceAll(step.Argument.DocString.Content, "$NAMESPACE", uniqueNamespace)
+		if step.Argument != nil {
+			step.Argument.DocString.Content = strings.ReplaceAll(step.Argument.DocString.Content, "$NAMESPACE", uniqueNamespace)
+		}
 	}
 }
 

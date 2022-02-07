@@ -1,14 +1,14 @@
 @kubernetes
 Feature: Matt
   Scenario: create one
-    Given I create a resource:
+    Given a resource called "namespace"
     """yaml
     apiVersion: v1
     kind: Namespace
     metadata:
       name: $NAMESPACE
     """
-    And I create a resource:
+    And a resource called "pod"
     """yaml
     apiVersion: v1
     kind: Pod
@@ -23,12 +23,6 @@ Feature: Matt
         image: busybox:latest
         name: busybox
     """
-    Then eventually `{.status.conditions[?(@.type=="Ready")].status}` should equal "True"
-    """yaml
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: test
-      namespace: $NAMESPACE
-    timeout: 2m
-    """
+    When I create namespace
+    And I create pod
+    Then in less than 3m pod's '{.status.conditions[?(@.type=="Ready")].status}' should equal "True"

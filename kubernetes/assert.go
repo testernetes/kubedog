@@ -1,83 +1,73 @@
 package kubernetes
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cucumber/godog"
 	. "github.com/matt-simons/gkube"
 	"github.com/matt-simons/kubedog/assertion"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/onsi/gomega/types"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // Could be generic assertion so we can get matcher related
 type k8sAssertion struct {
-	metav1.TypeMeta `json:",inline"`
-	// Standard object's metadata.
-	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-	// +optional
-	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
-
 	Timeout  string `json:"timeout"`
 	Interval string `json:"interval"`
 }
 
-func (a *k8sAssertion) GetUnstructured() *unstructured.Unstructured {
-	Expect(a.TypeMeta.APIVersion).ShouldNot(BeEmpty(), "Provided test case resource has an empty API Version")
-	Expect(a.TypeMeta.Kind).ShouldNot(BeEmpty(), "Provided test case resource has an empty Kind")
-	Expect(a.ObjectMeta.Name).ShouldNot(BeEmpty(), "Provided test case resource has an empty Name")
-
-	u := &unstructured.Unstructured{}
-	u.SetAPIVersion(a.APIVersion)
-	u.SetKind(a.Kind)
-	u.SetName(a.Name)
-	u.SetNamespace(a.Namespace)
-
-	return u
-}
-
-func (a *k8sAssertion) GetTimeout() time.Duration {
-	d, err := time.ParseDuration(a.Timeout)
-	if err != nil {
-		return 3 * time.Second
+func (k *kubernetesScenario) AddAssertSteps(s *godog.ScenarioContext) {
+	eventuallyPhrases := []string{
+		"in less than",
+		"in under",
+		"in no more than",
 	}
-	return d
-}
-
-func (a *k8sAssertion) GetInterval() time.Duration {
-	d, err := time.ParseDuration(a.Interval)
-	if err != nil {
-		return 500 * time.Millisecond
+	for _, phrase := range eventuallyPhrases {
+		s.Step(fmt.Sprintf(`^%s (\w+) ([a-z0-9][-a-z0-9]*[a-z0-9])'s '([^']*)' should (.*)$`, phrase), k.eventuallyObjectWithTimeout)
+		s.Step(fmt.Sprintf(`^%s (\w+) ([a-z0-9][-a-z0-9]*[a-z0-9])'s '([^']*)' should not (.*)$`, phrase), k.eventuallyNotObjectWithTimeout)
 	}
-	return d
-}
-
-func (t *kubernetesScenario) AddAssertSteps(s *godog.ScenarioContext) {
-	s.Step("^(eventually|consistently) `([^`]*)` should( not)? (.*)$", t.assert)
-}
-
-func (k *kubernetesScenario) assert(verb, jsonpath, not, matcherText string, manifest *godog.DocString) (err error) {
-	defer failHandler(&err)
-
-	a := k.parseAssertion(manifest)
-
-	u := a.GetUnstructured()
-	m := WithJSONPath(jsonpath, assertion.GetMatcher(matcherText))
-
-	timeout := a.GetTimeout()
-	interval := a.GetInterval()
-
-	switch {
-	case verb == "eventually" && not == "":
-		Eventually(k.Object(u)).WithTimeout(timeout).WithPolling(interval).Should(m)
-	case verb == "eventually" && not == "not":
-		Eventually(k.Object(u)).WithTimeout(timeout).WithPolling(interval).ShouldNot(m)
-	case verb == "consistently" && not == "":
-		Consistently(k.Object(u)).WithTimeout(timeout).WithPolling(interval).Should(m)
-	case verb == "consistently" && not == "not":
-		Consistently(k.Object(u)).WithTimeout(timeout).WithPolling(interval).ShouldNot(m)
+	consistentlyPhrases := []string{
+		"for at least",
+		"for no less than",
 	}
+	for _, phrase := range consistentlyPhrases {
+		s.Step(fmt.Sprintf(`^%s (\w+) ([a-z0-9][-a-z0-9]*[a-z0-9])'s '([^']*)' should (.*)$`, phrase), k.consistentlyObjectWithTimeout)
+		s.Step(fmt.Sprintf(`^%s (\w+) ([a-z0-9][-a-z0-9]*[a-z0-9])'s '([^']*)' should not (.*)$`, phrase), k.consistentlyNotObjectWithTimeout)
+	}
+}
 
+func (k *kubernetesScenario) eventuallyObjectWithTimeout(timeout, ref, jsonpath, matcherText string) (err error) {
+	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
+	Eventually(k.Object(o)).WithTimeout(d).Should(matcher)
 	return nil
+}
+
+func (k *kubernetesScenario) eventuallyNotObjectWithTimeout(timeout, ref, jsonpath, matcherText string) (err error) {
+	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
+	Eventually(k.Object(o)).WithTimeout(d).ShouldNot(matcher)
+	return nil
+}
+
+func (k *kubernetesScenario) consistentlyObjectWithTimeout(timeout, ref, jsonpath, matcherText string) (err error) {
+	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
+	Consistently(k.Object(o)).WithTimeout(d).Should(matcher)
+	return nil
+}
+
+func (k *kubernetesScenario) consistentlyNotObjectWithTimeout(timeout, ref, jsonpath, matcherText string) (err error) {
+	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
+	Consistently(k.Object(o)).WithTimeout(d).ShouldNot(matcher)
+	return nil
+}
+
+func (k *kubernetesScenario) parseAssertion(ref, jsonpath, matcherText, timeout string) (*unstructured.Unstructured, types.GomegaMatcher, time.Duration) {
+	u, ok := k.objRegister[ref]
+	Expect(ok).Should(BeTrue(), noResourceError, ref)
+
+	d, err := time.ParseDuration(timeout)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	return u, WithJSONPath(jsonpath, assertion.GetMatcher(matcherText)), d
 }
