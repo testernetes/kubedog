@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/cucumber/godog"
-	. "github.com/matt-simons/gkube"
-	"github.com/matt-simons/kubedog/assertion"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
+	. "github.com/tkube/gkube"
+	"github.com/tkube/kubedog/assertion"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 

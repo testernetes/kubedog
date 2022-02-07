@@ -765,10 +765,6 @@ github.com/markbates/errx v1.1.0/go.mod h1:PLa46Oex9KNbVDZhKel8v1OT7hD5JZ2eI7AHh
 github.com/markbates/oncer v1.0.0/go.mod h1:Z59JA581E9GP6w96jai+TGqafHPW+cPfRxz2aSZ0mcI=
 github.com/markbates/safe v1.0.1/go.mod h1:nAqgmRi7cY2nqMc92/bSEeQA+R4OheNU2T1kNSCBdG0=
 github.com/marstr/guid v1.1.0/go.mod h1:74gB1z2wpxxInTG6yaqA7KrtM0NZ+RbrcqDvYHefzho=
-github.com/matt-simons/gkube v0.0.0-20220127142030-1ee0519336af h1:uVuCoDe4acp0sKMGLy+kbH2OFLRdDh3jFhhTORXqdAo=
-github.com/matt-simons/gkube v0.0.0-20220127142030-1ee0519336af/go.mod h1:RhOIqL3wmRmo59i0kXT3WFw3cLm+ZrhJTPLgMB885TE=
-github.com/matt-simons/trackedclient v0.0.0-20211222115330-0f0181a495cd h1:2D5QMax6pZBCzHEW+XW6COAC+HmlonALZP+ddGaFt8A=
-github.com/matt-simons/trackedclient v0.0.0-20211222115330-0f0181a495cd/go.mod h1:OOoyqxhD3LvB+K1614PA6s6lAf6bc5WfKeaL29HMN6s=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-colorable v0.1.4/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-colorable v0.1.6/go.mod h1:u6P/XSegPjTcexA+o6vUJrdnUu04hMope9wVRipJSqc=
@@ -1044,6 +1040,10 @@ github.com/syndtr/gocapability v0.0.0-20180916011248-d98352740cb2/go.mod h1:hkRG
 github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
 github.com/tchap/go-patricia v2.2.6+incompatible/go.mod h1:bmLyhP68RS6kStMGxByiQ23RP/odRBOTVjwp2cDyi6I=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
+github.com/tkube/gkube v0.0.0-20220207143243-ebfb5e179b09 h1:I8e+GxOESkzZVGyAPLvEQuHEls/mckAQ1i3tEwfph7M=
+github.com/tkube/gkube v0.0.0-20220207143243-ebfb5e179b09/go.mod h1:ZRi8FSRl8wciIPwH6d9t+qzgKhJXcGZOhg9VS8/l9s4=
+github.com/tkube/trackedclient v0.0.0-20220207143835-6e562829a79e h1:G85fqB0giaOGpit/mkplKuabPbjSQstneCAxG+5/Sp4=
+github.com/tkube/trackedclient v0.0.0-20220207143835-6e562829a79e/go.mod h1:Tot6YqbRlPBhgb3R8A3kVTq3c6VuZU4CcfpINQNmfBg=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
