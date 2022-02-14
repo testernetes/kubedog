@@ -9,6 +9,7 @@ import (
 type kubernetesScenario struct {
 	gkube.KubernetesHelper
 	objRegister map[string]*unstructured.Unstructured
+	podSession  *gkube.PodSession
 }
 
 func NewKubernetesScenario(sc *godog.ScenarioContext, helper gkube.KubernetesHelper) kubernetesScenario {

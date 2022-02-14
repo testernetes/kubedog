@@ -3,20 +3,19 @@ package kubernetes
 import (
 	"fmt"
 
-	"github.com/cucumber/godog"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 )
 
-func (k *kubernetesScenario) parseResource(manifest *godog.DocString) *unstructured.Unstructured {
-	Expect(manifest.MediaType).Should(BeElementOf("json", "yaml"), "Unrecognised content-type %s. Supported types are json, yaml.", manifest.MediaType)
-
+func (k *kubernetesScenario) parseResource(r []byte) *unstructured.Unstructured {
 	u := &unstructured.Unstructured{}
-	Expect(yaml.Unmarshal([]byte(manifest.Content), u)).Should(Succeed())
+	Expect(yaml.Unmarshal(r, u)).Should(Succeed())
 
-	ns := u.GetNamespace()
-	u.SetNamespace(ns)
+	Expect(u.GetAPIVersion()).ShouldNot(BeEmpty(), noAPIVersionErrMsg)
+	Expect(u.GetKind()).ShouldNot(BeEmpty(), noKindErrMsg)
+	Expect(u.GetName()).ShouldNot(BeEmpty(), noNameErrMsg)
+
 	return u
 }
 

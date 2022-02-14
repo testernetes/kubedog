@@ -2,17 +2,17 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
+	"fmt"
 	"os"
-	"strings"
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
 	messages "github.com/cucumber/messages-go/v16"
+	"github.com/drone/envsubst"
 	"github.com/onsi/gomega"
 	"github.com/spf13/pflag"
 	"github.com/tkube/gkube"
+	"github.com/tkube/kubedog/format"
 	"github.com/tkube/kubedog/kubernetes"
 	"github.com/tkube/trackedclient"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -20,8 +20,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
+// varsubRegex is the regular expression used to validate
+// the var names before substitution
+const varsubRegex = "^[_[:alpha:]][_[:alpha:][:digit:]]*$"
+
 var opts = godog.Options{
 	Output: colors.Colored(os.Stdout),
+	Format: "k8s",
 }
 
 func main() {
@@ -32,6 +37,8 @@ func main() {
 	pflag.Parse()
 	opts.Paths = pflag.Args()
 
+	godog.Format("k8s", "Pretty Formatter for kubernetes", format.KubernetesFormatterFunc)
+
 	testSuite := godog.TestSuite{
 		Name:    *name,
 		Options: &opts,
@@ -40,11 +47,20 @@ func main() {
 	testSuite.ScenarioInitializer = func(sc *godog.ScenarioContext) {
 		sc.BeforeScenario(func(s *godog.Scenario) {
 			if isKubernetesScenario(s.Tags) {
-				replaceVariables(s)
 				setupKubernetesScenarioRun(sc)
 			}
 		})
+		sc.StepContext().Before(func(ctx context.Context, st *godog.Step) (context.Context, error) {
+			vars, ok := ctx.Value(&kubernetes.VarsKey{}).(map[string]string)
+			if !ok || len(vars) == 0 {
+				return ctx, nil
+			}
+			err := stepVariableSubstitution(st, vars)
+			return nil, err
+		})
 	}
+
+	testSuite.Options.ShowStepDefinitions = false
 
 	os.Exit(testSuite.Run())
 }
@@ -58,15 +74,34 @@ func isKubernetesScenario(tags []*messages.PickleTag) bool {
 	return false
 }
 
-func replaceVariables(s *godog.Scenario) {
-	uniqueNamespace := "test-" + uuidOrDie()
-	for i := range s.Steps {
-		step := s.Steps[i]
-		step.Text = strings.ReplaceAll(step.Text, "$NAMESPACE", uniqueNamespace)
-		if step.Argument != nil {
-			step.Argument.DocString.Content = strings.ReplaceAll(step.Argument.DocString.Content, "$NAMESPACE", uniqueNamespace)
+func stepVariableSubstitution(step *godog.Step, vars map[string]string) error {
+	text, err := sub(step.Text, vars)
+	if err != nil {
+		return err
+	}
+	step.Text = text
+
+	if step.Argument != nil {
+		if step.Argument.DocString != nil {
+			content, err := sub(step.Argument.DocString.Content, vars)
+			if err != nil {
+				return err
+			}
+			step.Argument.DocString.Content = content
 		}
 	}
+	return nil
+}
+
+func sub(in string, vars map[string]string) (string, error) {
+	// run bash variable substitutions
+	out, err := envsubst.Eval(in, func(s string) string {
+		return vars[s]
+	})
+	if err != nil {
+		return out, fmt.Errorf("variable substitution failed: %w", err)
+	}
+	return out, nil
 }
 
 func setupKubernetesScenarioRun(sc *godog.ScenarioContext) {
@@ -88,20 +123,7 @@ func setupKubernetesScenarioRun(sc *godog.ScenarioContext) {
 	kubernetes.NewKubernetesScenario(sc, gkube.NewKubernetesHelper(gkube.WithClient(objTrackingClient)))
 
 	sc.After(func(ctx context.Context, sc *godog.Scenario, err error) (context.Context, error) {
-		objTrackingClient.DeleteAllTracked(ctx)
-		return ctx, err
+		gomega.Expect(objTrackingClient.DeleteAllTracked(ctx)).Should(gomega.Succeed())
+		return ctx, nil
 	})
-}
-
-func uuidOrDie() string {
-	u := make([]byte, 16)
-	_, err := rand.Read(u)
-	if err != nil {
-		panic(err)
-	}
-
-	u[8] = (u[8] | 0x80) & 0xBF
-	u[6] = (u[6] | 0x40) & 0x4F
-
-	return hex.EncodeToString(u)
 }

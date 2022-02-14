@@ -1,14 +1,14 @@
 @kubernetes
 Feature: Matt
   Scenario: create one
-    Given a resource called "namespace"
+    Given a resource called namespace
     """yaml
     apiVersion: v1
     kind: Namespace
     metadata:
       name: $NAMESPACE
     """
-    And a resource called "pod"
+    And a resource called pod
     """yaml
     apiVersion: v1
     kind: Pod
