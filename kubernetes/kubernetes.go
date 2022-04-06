@@ -2,7 +2,7 @@ package kubernetes
 
 import (
 	"github.com/cucumber/godog"
-	"github.com/tkube/gkube"
+	"github.com/testernetes/gkube"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 

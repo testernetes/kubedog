@@ -1049,11 +1049,11 @@ github.com/syndtr/gocapability v0.0.0-20170704070218-db04d3cc01c8/go.mod h1:hkRG
 github.com/syndtr/gocapability v0.0.0-20180916011248-d98352740cb2/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
 github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
 github.com/tchap/go-patricia v2.2.6+incompatible/go.mod h1:bmLyhP68RS6kStMGxByiQ23RP/odRBOTVjwp2cDyi6I=
+github.com/testernetes/gkube v0.0.0-20220406091345-946c0944b670 h1:yxPPQARaUt4veTrb3OytE0APfIpJ8l8s39ZMJoef8MQ=
+github.com/testernetes/gkube v0.0.0-20220406091345-946c0944b670/go.mod h1:YHHgTc8zR8aGV5ga6UedR7cwd56RbN5PoqzgAp/n1hw=
+github.com/testernetes/trackedclient v0.0.0-20220406090936-e29c7eddb8f9 h1:AkBTRTvQIor0fjGT6QCS8/GtFcC2KF3TSzxvhx9y8Tk=
+github.com/testernetes/trackedclient v0.0.0-20220406090936-e29c7eddb8f9/go.mod h1:wc0eahbaA65uaYF/6ozKo4B84btiy5qtRmaf3HcFtno=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
-github.com/tkube/gkube v0.0.0-20220208101944-2a2a6814cba4 h1:FGH7smo+tmZtvR16+3KUFYIatLC1FU7OBWfNdTWKdqg=
-github.com/tkube/gkube v0.0.0-20220208101944-2a2a6814cba4/go.mod h1:ZRi8FSRl8wciIPwH6d9t+qzgKhJXcGZOhg9VS8/l9s4=
-github.com/tkube/trackedclient v0.0.0-20220208114814-0310f808f7a8 h1:ZNomowmlq8rQLDhRl8EEqNhlM8SzN8lsBumGqKVaZoU=
-github.com/tkube/trackedclient v0.0.0-20220208114814-0310f808f7a8/go.mod h1:Tot6YqbRlPBhgb3R8A3kVTq3c6VuZU4CcfpINQNmfBg=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=

@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/types"
-	. "github.com/tkube/gkube"
-	"github.com/tkube/kubedog/assertion"
+	. "github.com/testernetes/gkube"
+	"github.com/testernetes/kubedog/assertion"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 

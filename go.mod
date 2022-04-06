@@ -1,4 +1,4 @@
-module github.com/tkube/kubedog
+module github.com/testernetes/kubedog
 
 go 1.17
 
@@ -8,8 +8,8 @@ require (
 	github.com/drone/envsubst v1.0.3
 	github.com/onsi/gomega v1.18.1
 	github.com/spf13/pflag v1.0.5
-	github.com/tkube/gkube v0.0.0-20220208101944-2a2a6814cba4
-	github.com/tkube/trackedclient v0.0.0-20220208114814-0310f808f7a8
+	github.com/testernetes/gkube v0.0.0-20220406091345-946c0944b670
+	github.com/testernetes/trackedclient v0.0.0-20220406090936-e29c7eddb8f9
 	k8s.io/api v0.23.3
 	k8s.io/apimachinery v0.23.3
 	k8s.io/client-go v0.23.3
