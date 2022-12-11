@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -9,8 +10,8 @@ import (
 	. "github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/types"
+	"github.com/testernetes/bdk/assertion"
 	. "github.com/testernetes/gkube"
-	"github.com/testernetes/kubedog/assertion"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -20,6 +21,7 @@ func (k *kubernetesScenario) AddAssertSteps(sc *godog.ScenarioContext) {
 		"in under ",
 		"in no more than ",
 		"at least ",
+		"within ",
 		"",
 	}
 	for _, phrase := range eventuallyPhrases {
@@ -38,35 +40,40 @@ func (k *kubernetesScenario) AddAssertSteps(sc *godog.ScenarioContext) {
 	}
 }
 
-func (k *kubernetesScenario) eventuallyObjectWithTimeout(timeout, ref, jsonpath, matcherText string) (err error) {
+func (k *kubernetesScenario) eventuallyObjectWithTimeout(ctx context.Context, timeout, ref, jsonpath, matcherText string) (err error) {
 	defer failHandler(&err)
 	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
-	Eventually(k.Object(o)).WithTimeout(d).Should(matcher)
+	ctx, _ = context.WithTimeout(ctx, d)
+	Eventually(k.Object).WithContext(ctx).WithArguments(o).WithTimeout(d).Should(matcher)
 	return nil
 }
 
-func (k *kubernetesScenario) eventuallyNotObjectWithTimeout(timeout, ref, jsonpath, matcherText string) (err error) {
+func (k *kubernetesScenario) eventuallyNotObjectWithTimeout(ctx context.Context, timeout, ref, jsonpath, matcherText string) (err error) {
 	defer failHandler(&err)
 	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
-	Eventually(k.Object(o)).WithTimeout(d).ShouldNot(matcher)
+	ctx, _ = context.WithTimeout(ctx, d)
+	Eventually(k.Object).WithContext(ctx).WithArguments(o).WithTimeout(d).ShouldNot(matcher)
 	return nil
 }
 
-func (k *kubernetesScenario) consistentlyObjectWithTimeout(timeout, ref, jsonpath, matcherText string) (err error) {
+func (k *kubernetesScenario) consistentlyObjectWithTimeout(ctx context.Context, timeout, ref, jsonpath, matcherText string) (err error) {
 	defer failHandler(&err)
 	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
-	Consistently(k.Object(o)).WithTimeout(d).Should(matcher)
+	ctx, _ = context.WithTimeout(ctx, d)
+	Consistently(k.Object).WithContext(ctx).WithArguments(o).WithTimeout(d).Should(matcher)
 	return nil
 }
 
-func (k *kubernetesScenario) consistentlyNotObjectWithTimeout(timeout, ref, jsonpath, matcherText string) (err error) {
+func (k *kubernetesScenario) consistentlyNotObjectWithTimeout(ctx context.Context, timeout, ref, jsonpath, matcherText string) (err error) {
 	defer failHandler(&err)
 	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
-	Consistently(k.Object(o)).WithTimeout(d).ShouldNot(matcher)
+	ctx, _ = context.WithTimeout(ctx, d)
+	Consistently(k.Object).WithContext(ctx).WithArguments(o).WithTimeout(d).ShouldNot(matcher)
 	return nil
 }
 
-func (k *kubernetesScenario) exitCodeShouldBe(timeout string, code int) (err error) {
+// Needs mapping to a specific podSession
+func (k *kubernetesScenario) exitCodeShouldBe(ctx context.Context, timeout string, code int) (err error) {
 	defer failHandler(&err)
 
 	d, err := time.ParseDuration(timeout)
@@ -77,7 +84,8 @@ func (k *kubernetesScenario) exitCodeShouldBe(timeout string, code int) (err err
 	return nil
 }
 
-func (k *kubernetesScenario) shouldSay(timeout, message string) (err error) {
+// Needs mapping to a specific podSession
+func (k *kubernetesScenario) shouldSay(ctx context.Context, timeout, message string) (err error) {
 	defer failHandler(&err)
 
 	d, err := time.ParseDuration(timeout)
@@ -98,5 +106,5 @@ func (k *kubernetesScenario) parseAssertion(ref, jsonpath, matcherText, timeout 
 	d, err := time.ParseDuration(timeout)
 	Expect(err).ShouldNot(HaveOccurred())
 
-	return u, WithJSONPath(jsonpath, assertion.GetMatcher(matcherText)), d
+	return u, HaveJSONPath(jsonpath, assertion.GetMatcher(matcherText)), d
 }

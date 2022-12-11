@@ -20,7 +20,9 @@ func NewKubernetesScenario(sc *godog.ScenarioContext, helper gkube.KubernetesHel
 
 	// Register Kubernetes Steps for the Scenario
 	ks.AddCRUDSteps(sc)
+	ks.AddPodExtensionSteps(sc)
 	ks.AddAssertSteps(sc)
+	ks.AddResourceSteps(sc)
 
 	return ks
 }

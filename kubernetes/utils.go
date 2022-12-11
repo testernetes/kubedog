@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"bytes"
 	"fmt"
 
 	. "github.com/onsi/gomega"
@@ -10,6 +11,7 @@ import (
 
 func (k *kubernetesScenario) parseResource(r []byte) *unstructured.Unstructured {
 	u := &unstructured.Unstructured{}
+	r = bytes.ReplaceAll(r, []byte("\t"), []byte("  "))
 	Expect(yaml.Unmarshal(r, u)).Should(Succeed())
 
 	Expect(u.GetAPIVersion()).ShouldNot(BeEmpty(), noAPIVersionErrMsg)
