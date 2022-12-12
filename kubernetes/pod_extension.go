@@ -11,17 +11,23 @@ import (
 )
 
 func (k *kubernetesScenario) AddPodExtensionSteps(sc *godog.ScenarioContext) {
-	sc.Step(`^I execute "([^"]+)" in `+dns1123Name, k.iExecIn)
+	sc.Step(`^I execute "([^"]+)" in `+dns1123Name, k.iExecInDefaultContainer)
 	sc.Step(`^I execute "([^"]+)" in `+dns1123Name+`/`+dns1123Name, k.iExecIn)
 	sc.Step(`^I port forward `+dns1123Name+`on ports ([0-9: ]+)`, k.iPortForwardPod)
 }
 
-func (k *kubernetesScenario) iExecIn(ctx context.Context, cmd, ref string) (err error) {
+// Add support for executing a script via docString
+
+func (k *kubernetesScenario) iExecInDefaultContainer(ctx context.Context, cmd, ref string) (err error) {
+	return k.iExecIn(ctx, cmd, ref, "")
+}
+
+func (k *kubernetesScenario) iExecIn(ctx context.Context, cmd, ref, container string) (err error) {
 	defer failHandler(&err)
 
 	pod := k.getPodFromRegister(ref)
 
-	session, err := k.Exec(ctx, pod, "", []string{"/bin/sh", "-c", cmd}, k.out, k.errOut)
+	session, err := k.Exec(ctx, pod, container, []string{"/bin/sh", "-c", cmd}, k.out, k.errOut)
 	Expect(err).ShouldNot(HaveOccurred())
 	k.podSessions[ref] = session
 
