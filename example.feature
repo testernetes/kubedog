@@ -28,3 +28,5 @@ Feature: Matt
 		When I create namespace
 		And I create pod
 		Then within 1m pod's '{.status.conditions[?(@.type=="Ready")].status}' should equal "True"
+		When I execute "echo hello" in pod
+		Then within 20s pod should log "hello"

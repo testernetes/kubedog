@@ -27,8 +27,8 @@ func (k *kubernetesScenario) AddAssertSteps(sc *godog.ScenarioContext) {
 	for _, phrase := range eventuallyPhrases {
 		sc.Step(fmt.Sprintf(`^%s(\d+\w{1,2})*[,]?\s?([a-z0-9][-a-z0-9]*[a-z0-9])'s '([^']*)' should (.*)$`, phrase), k.eventuallyObjectWithTimeout)
 		sc.Step(fmt.Sprintf(`^%s(\d+\w{1,2})*[,]?\s?([a-z0-9][-a-z0-9]*[a-z0-9])'s '([^']*)' should not (.*)$`, phrase), k.eventuallyNotObjectWithTimeout)
-		sc.Step(fmt.Sprintf(`^%s(\d+\w{1,2})*[,]?\s?the exit code should be (\d+)$`, phrase), k.exitCodeShouldBe)
-		sc.Step(fmt.Sprintf(`^%s(\d+\w{1,2})*[,]?\s?it should output "([^"]*)"$`, phrase), k.shouldSay)
+		sc.Step(fmt.Sprintf(`^%s(\d+\w{1,2})*[,]?\s?([a-z0-9][-a-z0-9]*[a-z0-9])'s exit code should be (\d+)$`, phrase), k.exitCodeShouldBe)
+		sc.Step(fmt.Sprintf(`^%s(\d+\w{1,2})*[,]?\s?([a-z0-9][-a-z0-9]*[a-z0-9]) should log "([^"]*)"$`, phrase), k.shouldSay)
 	}
 	consistentlyPhrases := []string{
 		"for at least",
@@ -72,26 +72,28 @@ func (k *kubernetesScenario) consistentlyNotObjectWithTimeout(ctx context.Contex
 	return nil
 }
 
-// Needs mapping to a specific podSession
-func (k *kubernetesScenario) exitCodeShouldBe(ctx context.Context, timeout string, code int) (err error) {
+func (k *kubernetesScenario) exitCodeShouldBe(ctx context.Context, timeout, ref string, code int) (err error) {
 	defer failHandler(&err)
 
 	d, err := time.ParseDuration(timeout)
 	Expect(err).ShouldNot(HaveOccurred())
 
-	Eventually(k.podSession).WithTimeout(d).Should(Exit(code))
+	s, ok := k.podSessions[ref]
+	Expect(ok).Should(BeTrue())
+	Eventually(s).WithTimeout(d).Should(Exit(code))
 
 	return nil
 }
 
-// Needs mapping to a specific podSession
-func (k *kubernetesScenario) shouldSay(ctx context.Context, timeout, message string) (err error) {
+func (k *kubernetesScenario) shouldSay(ctx context.Context, timeout, ref, message string) (err error) {
 	defer failHandler(&err)
 
 	d, err := time.ParseDuration(timeout)
 	Expect(err).ShouldNot(HaveOccurred())
 
-	Eventually(k.podSession).WithTimeout(d).Should(Say(message))
+	s, ok := k.podSessions[ref]
+	Expect(ok).Should(BeTrue())
+	Eventually(s).WithTimeout(d).Should(Say(message))
 
 	return nil
 }

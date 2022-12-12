@@ -38,7 +38,7 @@ var opts = godog.Options{
 func main() {
 	godog.BindCommandLineFlags("", &opts)
 
-	name := pflag.String("name", "kubedog", "name")
+	name := pflag.String("name", "bdk", "name")
 
 	pflag.Parse()
 	opts.Paths = pflag.Args()
