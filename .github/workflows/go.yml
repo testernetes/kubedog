@@ -6,6 +6,15 @@ name: Go
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
+env:
+    IMAGE_NAME: bdk
+    IMAGE_TAGS: v1 ${{ github.sha }}
+    IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+    REGISTRY_USER: ${{ github.actor }}
+    REGISTRY_PASSWORD: ${{ github.token }}
 
 jobs:
 
@@ -31,8 +40,25 @@ jobs:
       uses: redhat-actions/buildah-build@v2
       with:
         base-image: gcr.io/distroless/static-debian11
-        image: bdk
-        tags: latest
+        image: ${{ env.IMAGE_NAME }}
+        tags: ${{ env.IMAGE_TAGS }}
         content: |
           bdk
         entrypoint: ./bdk
+
+    # Push the image to GHCR (Image Registry)
+    - name: Push To GHCR
+      uses: ./
+      id: push
+      with:
+        image: ${{ steps.build_image.outputs.image }}
+        tags: ${{ steps.build_image.outputs.tags }}
+        registry: ${{ env.IMAGE_REGISTRY }}
+        username: ${{ env.REGISTRY_USER }}
+        password: ${{ env.REGISTRY_PASSWORD }}
+        extra-args: |
+          --disable-content-trust
+
+    - name: Echo outputs
+      run: |
+        echo "${{ toJSON(steps.push.outputs) }}"
