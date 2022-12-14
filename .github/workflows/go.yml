@@ -24,3 +24,13 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Build Image
+      uses: redhat-actions/buildah-build@v2
+      with:
+        base-image: gcr.io/distroless/static-debian11
+        image: bdk
+        tags: latest
+        content: |
+          bdk
+        entrypoint: ./bdk
