@@ -41,8 +41,9 @@ jobs:
         base-image: gcr.io/distroless/static-debian11
         image: ${{ env.IMAGE_NAME }}
         tags: ${{ env.IMAGE_TAGS }}
+        workdir: /
         content: |
-          bdk /
+          bdk
         entrypoint: /bdk
 
     # Push the image to GHCR (Image Registry)
