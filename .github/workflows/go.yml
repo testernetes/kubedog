@@ -42,8 +42,8 @@ jobs:
         image: ${{ env.IMAGE_NAME }}
         tags: ${{ env.IMAGE_TAGS }}
         content: |
-          bdk
-        entrypoint: ./bdk
+          bdk /usr/local/bin/
+        entrypoint: /usr/local/bin/bdk
 
     # Push the image to GHCR (Image Registry)
     - name: Push To GHCR
