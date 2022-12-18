@@ -21,12 +21,15 @@ Feature: Matt
 		  containers:
 		  - command:
 		    - sleep
-		    - "200"
-		    image: busybox:latest
-		    name: busybox
+		    - 200
+		    image: busybox
+		    name: bdk
 		"""
 		When I create namespace
 		And I create pod
 		Then within 1m pod's '{.status.conditions[?(@.type=="Ready")].status}' should equal "True"
-		When I execute "echo hello" in pod
-		Then within 20s pod should log "hello"
+		When I execute this script in pod:
+		"""
+		echo hello
+		echo world
+		"""

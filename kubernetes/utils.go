@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"bytes"
 	"fmt"
+	"runtime/debug"
 
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -22,7 +23,9 @@ func (k *kubernetesScenario) parseResource(r []byte) *unstructured.Unstructured 
 }
 
 func failHandler(err *error) {
+	// set a debugging flag to enable stack traces or not
 	if r := recover(); r != nil {
-		*err = fmt.Errorf("%s", r)
+		*err = fmt.Errorf("%s\n\n%s", r, string(debug.Stack()))
+		//*err = fmt.Errorf("%s", r)
 	}
 }

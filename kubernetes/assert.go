@@ -12,6 +12,7 @@ import (
 	"github.com/onsi/gomega/types"
 	"github.com/testernetes/bdk/assertion"
 	. "github.com/testernetes/gkube"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -43,7 +44,6 @@ func (k *kubernetesScenario) AddAssertSteps(sc *godog.ScenarioContext) {
 func (k *kubernetesScenario) eventuallyObjectWithTimeout(ctx context.Context, timeout, ref, jsonpath, matcherText string) (err error) {
 	defer failHandler(&err)
 	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
-	ctx, _ = context.WithTimeout(ctx, d)
 	Eventually(k.Object).WithContext(ctx).WithArguments(o).WithTimeout(d).Should(matcher)
 	return nil
 }
@@ -51,7 +51,6 @@ func (k *kubernetesScenario) eventuallyObjectWithTimeout(ctx context.Context, ti
 func (k *kubernetesScenario) eventuallyNotObjectWithTimeout(ctx context.Context, timeout, ref, jsonpath, matcherText string) (err error) {
 	defer failHandler(&err)
 	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
-	ctx, _ = context.WithTimeout(ctx, d)
 	Eventually(k.Object).WithContext(ctx).WithArguments(o).WithTimeout(d).ShouldNot(matcher)
 	return nil
 }
@@ -59,7 +58,6 @@ func (k *kubernetesScenario) eventuallyNotObjectWithTimeout(ctx context.Context,
 func (k *kubernetesScenario) consistentlyObjectWithTimeout(ctx context.Context, timeout, ref, jsonpath, matcherText string) (err error) {
 	defer failHandler(&err)
 	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
-	ctx, _ = context.WithTimeout(ctx, d)
 	Consistently(k.Object).WithContext(ctx).WithArguments(o).WithTimeout(d).Should(matcher)
 	return nil
 }
@@ -67,7 +65,6 @@ func (k *kubernetesScenario) consistentlyObjectWithTimeout(ctx context.Context, 
 func (k *kubernetesScenario) consistentlyNotObjectWithTimeout(ctx context.Context, timeout, ref, jsonpath, matcherText string) (err error) {
 	defer failHandler(&err)
 	o, matcher, d := k.parseAssertion(ref, jsonpath, matcherText, timeout)
-	ctx, _ = context.WithTimeout(ctx, d)
 	Consistently(k.Object).WithContext(ctx).WithArguments(o).WithTimeout(d).ShouldNot(matcher)
 	return nil
 }
@@ -75,6 +72,9 @@ func (k *kubernetesScenario) consistentlyNotObjectWithTimeout(ctx context.Contex
 func (k *kubernetesScenario) exitCodeShouldBe(ctx context.Context, timeout, ref string, code int) (err error) {
 	defer failHandler(&err)
 
+	if timeout == "" {
+		timeout = "1s"
+	}
 	d, err := time.ParseDuration(timeout)
 	Expect(err).ShouldNot(HaveOccurred())
 
@@ -88,11 +88,24 @@ func (k *kubernetesScenario) exitCodeShouldBe(ctx context.Context, timeout, ref 
 func (k *kubernetesScenario) shouldSay(ctx context.Context, timeout, ref, message string) (err error) {
 	defer failHandler(&err)
 
+	if timeout == "" {
+		timeout = "1s"
+	}
 	d, err := time.ParseDuration(timeout)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	s, ok := k.podSessions[ref]
-	Expect(ok).Should(BeTrue())
+	if !ok {
+		pod := k.getPodFromRegister(ref)
+		Expect(err).ShouldNot(HaveOccurred())
+		Eventually(func() error {
+			s, err = k.Logs(ctx, pod, &corev1.PodLogOptions{
+				Container: "",
+				Follow:    true,
+			}, k.out, k.errOut)
+			return err
+		}).WithTimeout(d).Should(Succeed())
+	}
 	Eventually(s).WithTimeout(d).Should(Say(message))
 
 	return nil
